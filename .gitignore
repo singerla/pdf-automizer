@@ -1,0 +1,16 @@
+### Node
+node_modules/
+pdf/
+out/
+dist/
+
+### Testing
+__tests__/images
+coverage/
+__tests__/pdf-output/
+__tests__/pdf-cache/
+
+### Customer related files
+__customer__/
+src/dev-customer.ts
+

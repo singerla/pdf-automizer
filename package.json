@@ -1,0 +1,55 @@
+{
+  "name": "pdf-automizer",
+  "version": "0.0.1",
+  "description": "A template based pdf generator",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/singerla/pdf-automizer.git"
+  },
+  "author": "Thomas Singer <tsinger@gmx.de> (github.com/singerla)",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "build": "tsc",
+    "dev": "nodemon -e ts --exec 'ts-node' src/dev.ts",
+    "test": "npx jest",
+    "test-coverage": "npx jest --coverage",
+    "lint": "eslint '*/**/*.{js,ts,tsx}' --fix",
+    "prettier": "prettier --config .prettierrc 'src/**/*.ts' --write"
+  },
+  "files": [
+    "dist",
+    "README"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.js",
+  "keywords": [
+    "js-create-pdf",
+    "js-generate-pdf",
+    "js-pdf",
+    "js-produce-pdf",
+    "js-pdf",
+    "pdf",
+    "pdf-automation",
+    "pdf-generator",
+    "pdf"
+  ],
+  "devDependencies": {
+    "@types/jest": "^29.4.0",
+    "@types/node": "^18.11.18",
+    "@typescript-eslint/eslint-plugin": "^5.49.0",
+    "@typescript-eslint/parser": "^5.49.0",
+    "eslint": "^8.32.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "jest": "^29.4.0",
+    "nodemon": "^2.0.20",
+    "prettier": "^2.8.3",
+    "ts-jest": "^29.0.5",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1"
+  }
+}
