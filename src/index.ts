@@ -1,36 +1,36 @@
 import fs from 'fs';
 import { PDFDocument, PDFTextField } from 'pdf-lib';
-
-export type FieldInfo = {
-  name: string;
-  type: string;
-  value?: string;
-  field: PDFTextField;
-  update: (str: string) => void;
-};
-
-export interface IModifyPage {
-  fields: FieldInfo[];
-}
-
-export type PageModification = (page: IModifyPage) => void;
+import {
+  AutomizerSummary,
+  FieldInfo,
+  IModifyPage,
+  PageModification,
+  PDFAutomizerParams,
+} from './types';
 
 export default class PDFAutomizer {
-  templatePdf: PDFDocument;
-  outputPdf: PDFDocument;
+  templatePdf: PDFDocument | undefined;
+  outputPdf: PDFDocument | undefined;
   modifications: {
     page: number;
     mods: PageModification[];
   }[] = [];
   fields: FieldInfo[] = [];
+  params: PDFAutomizerParams = {};
 
-  constructor(templatePdf: PDFDocument, outputPdf: PDFDocument) {
+  constructor(params: PDFAutomizerParams) {
+    this.params = params;
+  }
+
+  loadTemplates(templatePdf: PDFDocument, outputPdf?: PDFDocument) {
     this.templatePdf = templatePdf;
     this.outputPdf = outputPdf;
   }
 
-  static async loadPdf(filename: string) {
-    const existingPdfBytes = fs.readFileSync(filename);
+  async loadPdf(filename: string) {
+    const existingPdfBytes = fs.readFileSync(
+      this.params.templateDir + '/' + filename,
+    );
     return PDFDocument.load(existingPdfBytes);
   }
 
@@ -38,8 +38,23 @@ export default class PDFAutomizer {
     return PDFDocument.create();
   }
 
+  getTemplatePdf(): PDFDocument {
+    if (!this.templatePdf) {
+      throw new Error('Template not loaded');
+    }
+
+    return this.templatePdf;
+  }
+
+  getOutputPdf(): PDFDocument {
+    if (!this.outputPdf) {
+      throw new Error('Output not loaded');
+    }
+    return this.outputPdf;
+  }
+
   async readFieldNames() {
-    const form = this.templatePdf.getForm();
+    const form = this.getTemplatePdf().getForm();
     const fields = form.getFields();
     const info = <FieldInfo[]>[];
     fields.forEach((field) => {
@@ -66,12 +81,14 @@ export default class PDFAutomizer {
   }
 
   async appendModifiedPages(pages: number[]) {
-    const [importedPage] = await this.outputPdf.copyPages(
-      this.templatePdf,
+    const [importedPage] = await this.getOutputPdf().copyPages(
+      this.getTemplatePdf(),
       pages,
     );
-    this.outputPdf.addPage(importedPage);
+    this.getOutputPdf().addPage(importedPage);
   }
+
+  async addSlide(template: string, page: number, mods: PageModification[]) {}
 
   addPage(page: number, mods: PageModification[]) {
     this.modifications.push({
@@ -89,7 +106,7 @@ export default class PDFAutomizer {
           fields: this.fields,
         });
       });
-      await this.templatePdf.save();
+      await this.getTemplatePdf().save();
       await this.appendModifiedPages([0]);
     }
   }
@@ -120,8 +137,23 @@ export default class PDFAutomizer {
     };
   }
 
-  async writeOutput(filename: string) {
+  async writeOutput(filename: string): Promise<AutomizerSummary> {
+    if (!this.outputPdf) {
+      throw new Error('no output initialized');
+    }
     const pdfBytes = await this.outputPdf.save({ useObjectStreams: false });
-    fs.writeFileSync(filename, pdfBytes);
+    fs.writeFileSync(this.params.outputDir + '/' + filename, pdfBytes);
+
+    return {
+      status: 'finished',
+      duration: 1,
+      file: this.params.outputDir + '/' + filename,
+      filename: filename,
+      templates: 1,
+      slides: 1,
+      charts: 0,
+      images: 0,
+      masters: 0,
+    };
   }
 }

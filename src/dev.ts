@@ -32,12 +32,17 @@ const outputDir = `${__dirname}/../__tests__/pdf-output/`;
 const filename = 'YOUR_FILE.pdf';
 
 const run = async () => {
-  const automizer = new PDFAutomizer(
-    await PDFAutomizer.loadPdf(templateDir + filename),
+  const automizer = new PDFAutomizer({
+    templateDir,
+    outputDir,
+  });
+
+  automizer.loadTemplates(
+    await automizer.loadPdf(filename),
     await PDFAutomizer.createPdf(),
   );
 
-  // enamble this to show current fields in template pdf
+  // enable this to show current fields in template pdf
   // automizer.addPage(0, [PDFAutomizer.dumpFields()]);
 
   for (const makePages of data) {
@@ -52,7 +57,7 @@ const run = async () => {
   }
 
   await automizer.modifyPdf();
-  await automizer.writeOutput(outputDir + filename);
+  await automizer.writeOutput(filename);
 };
 
 run().then(() => {
